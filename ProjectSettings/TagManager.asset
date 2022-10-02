@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Enemy
   - Interactable
+  - SFXAudioSource
   layers:
   - Default
   - TransparentFX
@@ -21,9 +22,9 @@ TagManager:
   - Character
   - Collectables
   - Services
-  - 
-  - 
-  - 
+  - Particles
+  - CollidableEnemies
+  - Confiner
   - 
   - 
   - 

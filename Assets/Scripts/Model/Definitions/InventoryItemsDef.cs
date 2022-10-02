@@ -1,5 +1,5 @@
 using System;
-using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 namespace MainNameSpace.Model.Definitions
 {
@@ -16,15 +16,25 @@ namespace MainNameSpace.Model.Definitions
             }
             return default;
         }
+#if UNITY_EDITOR
+        public ItemDef[] ItemsForEditor => _items;
+#endif
     }
 
-    [Serializable]   
+
+    [Serializable]
     public struct ItemDef
     {
         [SerializeField] private string _id;
+        [SerializeField] private Sprite _icon;
+        [SerializeField] private ItemTag[] _tags;
         public string Id => _id;
-
         public bool IsVoid => string.IsNullOrEmpty(_id);
+        public Sprite Icon => _icon;
+        public bool HasTag(ItemTag tag)
+        {
+            return _tags.Contains(tag);
+        }
     }
 
 }

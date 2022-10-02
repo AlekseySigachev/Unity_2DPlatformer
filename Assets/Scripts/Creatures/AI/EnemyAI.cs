@@ -8,8 +8,8 @@ namespace MainNameSpace.Creature.AI
 {
     public class EnemyAI : MonoBehaviour
     {
-        [SerializeField] private LayerCheck _vision;
-        [SerializeField] private LayerCheck _canAttack;
+        [SerializeField] private ColliderCheck _vision;
+        [SerializeField] private ColliderCheck _canAttack;
         [SerializeField] private float _alarmDelay;
         [SerializeField] private float _attackCooldown = 1f;
         [SerializeField] private float _missTargetCooldown = 1f;

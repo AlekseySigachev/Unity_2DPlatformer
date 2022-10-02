@@ -30,9 +30,21 @@ namespace MainNameSpace.Creature.Character
         }
         public void OnThrow(InputAction.CallbackContext context)
         {
+            if (context.started)
+            {
+                CharacterREF.StartThrowingThrow();
+            }
+            if (context.canceled)
+            {
+                CharacterREF.PerformThrowing();
+            }
+        }
+
+        public void OnUseHealthPotion(InputAction.CallbackContext context)
+        {
             if (context.performed)
             {
-                CharacterREF.Throw();
+                CharacterREF.UseHealthPotion();
             }
         }
 

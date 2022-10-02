@@ -11,5 +11,11 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Levels/ShipLevel.unity
     guid: efe4b26617e39d64797c57a4a73d860c
+  - enabled: 1
+    path: Assets/Levels/HUD.unity
+    guid: 74207dbb22680424aa3f45ae07006922
+  - enabled: 1
+    path: Assets/Levels/MainMenu.unity
+    guid: 76ae295b4cb70a54eb57852db42d0e78
   m_configObjects:
     com.unity.input.settings: {fileID: 11400000, guid: 89014812e4d28304c901081d0406cb39, type: 2}

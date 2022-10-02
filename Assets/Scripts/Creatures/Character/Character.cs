@@ -4,34 +4,46 @@ using MainNameSpace.components.ColliderBased;
 using MainNameSpace.components.Health;
 using UnityEngine;
 using UnityEditor.Animations;
+using System.Collections;
+using MainNameSpace.components;
+using MainNameSpace.Model.Data;
+
 namespace MainNameSpace.Creature.Character
 {
-    public class Character : Creature
+    public class Character : Creature, ICanAddInInventory
     {
        // [SerializeField] private LayerCheck _groundCheck;
+        [Header("Personal Checkers")]
         [SerializeField] private Vector3 _groundCheckPositionDelta;
         [SerializeField] private float _groundCheckRadius;
-        [SerializeField] private LayerCheck _wallCheck;
+        [SerializeField] private ColliderCheck _wallCheck;
 
-        [SerializeField] private Cooldown _throwCooldown;
+        [Space]
+        [Header("Personal Interaction")]
+        [SerializeField] private CheckCircleOverlap _interactionCheck;
+        [SerializeField] private LayerMask _interactLayer;
+        [SerializeField] private float _interactionRadius;
+
+        [Space]
+        [Header("Personal WeaponParams")]
         [SerializeField] private AnimatorController _armedAnimController;
         [SerializeField] private AnimatorController _disArmedAnimContoller;
 
-        [SerializeField] private CheckCircleOverlap _interactionCheck;
-        [SerializeField] private float _interactionRadius;
-        [SerializeField] private LayerMask _interactLayer;
+        [Header("Throw")]
+        [SerializeField] private Cooldown _throwCooldown;
+        [Header("Super Throw")]
+        [SerializeField] Cooldown _superThrowCooldown;
+        [SerializeField] private int _superThrowParticles;
+        [SerializeField] private float _superThrowDelay;
 
-
-
-        [Space]
-        [Header("Particles")]
-        [SerializeField] private ParticleSystem _hitParticles;
-        
+        [SerializeField] private ProbobilityDropComponent _hitDrop;
 
         private bool _allowDoubleJump;
+        private bool _superThrow;
         private GameSession _session;
         private bool _isOnWall;
         private float _defalutGravityScale;
+        private HealthComponent _health;
 
         private static readonly int ThrowAttackKey = Animator.StringToHash("ThrowSword");
         private static readonly int IsOnWallKey = Animator.StringToHash("IsOnWall");
@@ -47,8 +59,8 @@ namespace MainNameSpace.Creature.Character
         private void Start()
         {
             _session = FindObjectOfType<GameSession>();
-            var health = GetComponent<HealthComponent>();
-            health.SetHealth(_session.data.Health);
+            _health = GetComponent<HealthComponent>();
+            _health.SetHealth(_session.data.Health.Value);
             _session.data.Inventory.OnChanged += OnInventoryChanged;
             UpdateHeroWeapon();
         }
@@ -71,13 +83,13 @@ namespace MainNameSpace.Creature.Character
             {
                 _isOnWall = false;
                 Rigidbody2D.gravityScale = _defalutGravityScale;
-            } return;
+            }
 
             Animator.SetBool(IsOnWallKey, _isOnWall);
         }
         public void OnHealthChanged(int currentHealth)
         {
-            _session.data.Health = currentHealth;
+            _session.data.Health.Value = currentHealth;
         }
 
         protected override float CalculateYVelocity()
@@ -101,7 +113,7 @@ namespace MainNameSpace.Creature.Character
         {
         if (!IsGrounded && _allowDoubleJump)
             {
-                _particles.Spawn("DoubleJump");
+                DoJumpVfs();
                 _allowDoubleJump = false;
                 return JumpForce;
             }
@@ -126,12 +138,8 @@ namespace MainNameSpace.Creature.Character
         {
             var numCoinsToSpawn = Mathf.Min(CoinsCount, 5);
             _session.data.Inventory.Remove("Coin", numCoinsToSpawn);
-
-            var burst = _hitParticles.emission.GetBurst(0);
-            burst.count = numCoinsToSpawn;
-            _hitParticles.emission.SetBurst(0, burst);
-            _hitParticles.gameObject.SetActive(true);
-            _hitParticles.Play();
+            _hitDrop.SetCount(numCoinsToSpawn);
+            _hitDrop.CalculateDrop();
         }
 
         public void Interact()
@@ -170,20 +178,67 @@ namespace MainNameSpace.Creature.Character
 
         public void OnThrowAttack()
         {
+            if ((SwordCount <= 1)) return;
+            if (_superThrow)
+            {
+                var numThrows = Mathf.Min(_superThrowParticles, SwordCount - 1);
+                StartCoroutine(DoSuperThrow(numThrows));
+            }
+            else
+            {
+                ThrowAndRemoveFromInventory(1);
+            }
+            _superThrow = false;
+        }
+
+        private IEnumerator DoSuperThrow(int numThrows)
+        {
+            for (int i = 0; i < numThrows; i++)
+            {
+                ThrowAndRemoveFromInventory(1);
+                yield return new WaitForSeconds(_superThrowDelay);
+            }
+        }
+
+        private void ThrowAndRemoveFromInventory(int count)
+        {
+            if ((SwordCount <= 1)) return;
+            Sounds.Play("Range");
+            _session.data.Inventory.Remove("Sword", count);
             _particles.Spawn("ThrowSword");
         }
-        public void Throw()
+
+        public void StartThrowingThrow()
         {
-            if (_throwCooldown.IsReady)
+            if ((SwordCount <= 1)) return;
+            _superThrowCooldown.Reset();
+        }
+
+        public void PerformThrowing()
+        {
+            if(!_throwCooldown.IsReady || SwordCount <= 1) return;
+
+            if (_superThrowCooldown.IsReady) _superThrow = true;
+
+            Animator.SetTrigger(ThrowAttackKey);
+            _throwCooldown.Reset();
+
+        }
+
+        public void UseHealthPotion()
+        {
+            var potionName = "HealthPotion";
+            var potionsCount = _session.data.Inventory.Count(potionName);
+            if(potionsCount > 0)
             {
-                Animator.SetTrigger(ThrowAttackKey);
-                _throwCooldown.Reset();
-               // _session.data.Inventory.Remove("Sword", 1);
+                _health.ModifyHealth(5);
+                _session.data.Inventory.Remove(potionName, 1);
             }
+ 
         }
         private void OnDestroy()
         {
-            _session.data.Inventory.OnChanged -= OnInventoryChanged;
+            if(_session != null) _session.data.Inventory.OnChanged -= OnInventoryChanged;
         }
     }
 

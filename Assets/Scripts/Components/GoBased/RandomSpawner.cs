@@ -2,6 +2,8 @@ using System.Collections;
 using UnityEngine;
 using UnityEditor;
 using Random = UnityEngine.Random;
+using MainNameSpace.Utils;
+
 namespace MainNameSpace.components.GoBased
 {
     public class RandomSpawner : MonoBehaviour
@@ -25,6 +27,14 @@ namespace MainNameSpace.components.GoBased
             _routine = StartCoroutine(StartSpawn(items));
         }
 
+        public void DropImmidiate(GameObject[] items)
+        {
+            foreach (var item in items)
+            {
+                Spawn(item);
+            }
+        }
+
         private IEnumerator StartSpawn(GameObject[] particles)
         {
             for (var i = 0; i < particles.Length; i++)
@@ -37,7 +47,7 @@ namespace MainNameSpace.components.GoBased
 
         private void Spawn(GameObject particle)
         {
-            var instance = Instantiate(particle, transform.position, Quaternion.identity);
+            var instance = SpawnUtils.Spawn(particle, transform.position);
             var rigidbody = instance.GetComponent<Rigidbody2D>();
 
             var randomAngle = Random.Range(0, _sectorAngle);

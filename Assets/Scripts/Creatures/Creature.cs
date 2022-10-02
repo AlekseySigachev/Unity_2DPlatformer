@@ -1,11 +1,13 @@
 using UnityEngine;
 using MainNameSpace.components.ColliderBased;
 using MainNameSpace.components.GoBased;
+using MainNameSpace.components.Audio;
+
 namespace MainNameSpace.Creature
 {
     public class Creature : MonoBehaviour
     {
-        [Header("Parametrs")]
+        [Header("General Parametrs")]
         [SerializeField] private bool _invertScale;
         [SerializeField] private float speed;
         [SerializeField] protected float JumpForce;
@@ -13,9 +15,9 @@ namespace MainNameSpace.Creature
         [SerializeField] protected float SlamDownVelocity;
         [SerializeField] private int _damage;
 
-        [Header("Checkers")]
+        [Header("General Checkers")]
         [SerializeField] protected LayerMask GroundLayer;
-        [SerializeField] private LayerCheck _groundCheck;
+        [SerializeField] private ColliderCheck _groundCheck;
         [SerializeField] private CheckCircleOverlap _attackRange;
 
         [SerializeField] protected SpawnListComponent _particles;
@@ -24,6 +26,7 @@ namespace MainNameSpace.Creature
         protected Rigidbody2D Rigidbody2D;
         protected Vector2 CurrentDirection;
         protected Animator Animator;
+        protected PlaySoundsComponent Sounds;
         protected bool IsGrounded;
         private bool _isJumping;
 
@@ -37,6 +40,7 @@ namespace MainNameSpace.Creature
         {
             Rigidbody2D = GetComponent<Rigidbody2D>();
             Animator = GetComponent<Animator>();
+            Sounds = GetComponent<PlaySoundsComponent>();
         }
 
         protected virtual void Update()
@@ -88,11 +92,13 @@ namespace MainNameSpace.Creature
 
         protected virtual float CalculateJumpVelocity(float yVelocity)
         {
-            if (IsGrounded)
-            {
-                yVelocity += JumpForce;
-            }
+            if (IsGrounded) yVelocity += JumpForce;
             return yVelocity;
+        }
+        protected void DoJumpVfs()
+        {
+            _particles.Spawn("DoubleJump");
+            Sounds.Play("Jump");
         }
 
         public void UpdateSpriteDirection(Vector2 direction)
@@ -116,6 +122,7 @@ namespace MainNameSpace.Creature
         public virtual void Attack()
         {
             Animator.SetTrigger(AttackKey);
+            Sounds.Play("Melee");
         }
         public virtual void OnAttackAnimation() //AnimEvent
         {

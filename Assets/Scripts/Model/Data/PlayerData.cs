@@ -1,4 +1,5 @@
 using UnityEngine;
+using MainNameSpace.Model.Data.Properties;
 using System;
 namespace MainNameSpace.Model.Data
 {
@@ -7,7 +8,8 @@ namespace MainNameSpace.Model.Data
     {
         [SerializeField] private InventoryData _inventory;
         //public int Coins;
-        public int Health;
+        //public int Health;
+        public IntProperty Health = new IntProperty();
         //public bool IsArmed;
         public InventoryData Inventory => _inventory;
 

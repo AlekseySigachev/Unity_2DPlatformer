@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: DefsFacade
   m_EditorClassIdentifier: 
   _items: {fileID: 11400000, guid: 01de69f26052cd7408548d3edee200ab, type: 2}
+  _player: {fileID: 11400000, guid: 3f0e007da2964324caa82eff48c34675, type: 2}

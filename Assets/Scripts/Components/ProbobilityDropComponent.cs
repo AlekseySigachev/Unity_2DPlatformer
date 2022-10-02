@@ -50,6 +50,12 @@ namespace MainNameSpace.components
             [Range(0f, 100f)] public float Probability;
         }
 
+        public void SetCount(int numCoinsToSpawn)
+        {
+            _count = numCoinsToSpawn;
+        }
+
+
         [Serializable]
         public class DropEvent : UnityEvent<GameObject[]>
         {
